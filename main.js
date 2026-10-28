@@ -50,7 +50,7 @@
         { t: "S_k / √k", tr: (s, k) => s / Math.sqrt(k), c: (k) => mu * Math.sqrt(k), b: () => 2 * sd, cl: "√k μ", bl: "√k μ ± 2σ" },
       ];
       for (const vw of views) {
-        const ch = chart(el, { title: `${model}: ${vw.t}`, xlabel: "k = sistemi attaccati", xlog: true, height: 270,
+        const ch = chart(el, { title: `${model}: ${vw.t}`, xlabel: "k = systems attacked", xlog: true, height: 270,
           ymin: vw.ylim?.[0], ymax: vw.ylim?.[1] });
         paths.forEach((p, j) => ch.add({ x: ks, y: Array.from(p, (s, i) => vw.tr(s, ks[i])), width: 0.8, alpha: 0.55,
           color: `hsl(${(j * 47) % 360} 60% 55%)` }));
@@ -65,9 +65,9 @@
     const M = Sim.models(cfg.p), el = grid("dist-grid", 3);
     for (const model of MODELS) {
       const lat = model === "Bernoulli" ? 1 : 2, { mu } = M[model];
-      const cS = chart(el, { title: `${model}: S_n`, xlabel: "S_n", ylabel: "densità / picco", xlog: model === "Bernoulli", ymin: 0, height: 260, legendPos: "right" });
-      const cA = chart(el, { title: `${model}: S_n / n`, xlabel: "S_n / n", ylabel: "densità", ymin: 0, height: 260, legendPos: "right" });
-      const cN = chart(el, { title: `${model}: S_n / √n`, xlabel: "S_n / √n", ylabel: "densità", ymin: 0, height: 260, legendPos: "right" });
+      const cS = chart(el, { title: `${model}: S_n`, xlabel: "S_n", ylabel: "density / peak", xlog: model === "Bernoulli", ymin: 0, height: 260, legendPos: "right" });
+      const cA = chart(el, { title: `${model}: S_n / n`, xlabel: "S_n / n", ylabel: "density", ymin: 0, height: 260, legendPos: "right" });
+      const cN = chart(el, { title: `${model}: S_n / √n`, xlabel: "S_n / √n", ylabel: "density", ymin: 0, height: 260, legendPos: "right" });
       cfg.NS.forEach((n, i) => {
         const S = SAMP[model][n];
         const h1 = latticeHist(S, lat, 1), peak = Math.max(...h1.y);
@@ -92,38 +92,38 @@
         rows.push([model, n, f(Sim.mean(S) / n), f(mu, 3), f(vs, 1), f(n * v, 1), (vs / n / n).toExponential(2), (v / n).toExponential(2), f(vs / n), f(v, 3)]);
       }
     }
-    table("var-table", ["modello", "n", "media S<sub>n</sub>/n", "μ", "Var S<sub>n</sub>", "nσ²", "Var S<sub>n</sub>/n", "σ²/n", "Var S<sub>n</sub>/√n", "σ²"], rows);
+    table("var-table", ["model", "n", "mean S<sub>n</sub>/n", "μ", "Var S<sub>n</sub>", "nσ²", "Var S<sub>n</sub>/n", "σ²/n", "Var S<sub>n</sub>/√n", "σ²"], rows);
   }
 
   function renderVariance(V, cfg) {
     const el = grid("varplot-grid", 2), slopes = [];
     for (const model of MODELS) {
-      const d = V.models[model], ch = chart(el, { title: model + " (tratteggio = teoria)", xlabel: "n", ylabel: "varianza", xlog: true, ylog: true, height: 300 });
+      const d = V.models[model], ch = chart(el, { title: model + " (dashed = theory)", xlabel: "n", ylabel: "variance", xlog: true, ylog: true, height: 300 });
       const pal = Plot.palette();
       [["Var(S_n)", d.vS, (n) => d.theory * n], ["Var(S_n/n)", d.vA, (n) => d.theory / n], ["Var(S_n/√n)", d.vN, () => d.theory]].forEach(([lab, v, th], i) => {
-        ch.add({ type: "points", x: V.NS, y: v, color: pal[i], label: lab + " empirica", r: 3.2 });
+        ch.add({ type: "points", x: V.NS, y: v, color: pal[i], label: lab + " empirical", r: 3.2 });
         ch.add({ x: V.NS, y: V.NS.map(th), color: pal[i], dash: [5, 4], width: 1.2 });
       });
       ch.draw();
       slopes.push(`<b>${model}</b>: ${d.slopes.map((s) => (s >= 0 ? "+" : "") + s.toFixed(3)).join(", ")}`);
     }
-    $("var-slopes").innerHTML = "Pendenze stimate in scala log-log (teoria +1, −1, 0) — " + slopes.join(" · ");
+    $("var-slopes").innerHTML = "Estimated log-log slopes (theory +1, −1, 0) — " + slopes.join(" · ");
   }
 
   function renderLLN(L, SAMP, cfg) {
     const el = grid("lln-grid", 2), pal = Plot.palette(), M = Sim.models(cfg.p);
     for (const model of MODELS) {
       const d = L.models[model];
-      const ch = chart(el, { title: `${model}: P(|S_n/n − μ| > ε)`, xlabel: "n", ylabel: "probabilità", xlog: true, ymin: 0, ymax: 1.02, height: 300, legendPos: "right" });
+      const ch = chart(el, { title: `${model}: P(|S_n/n − μ| > ε)`, xlabel: "n", ylabel: "probability", xlog: true, ymin: 0, ymax: 1.02, height: 300, legendPos: "right" });
       L.EPS.forEach((e, i) => {
-        ch.add({ type: "points", connect: true, x: L.NS, y: d.prob[i], color: pal[i], label: `simulata, ε=${e}`, width: 1.4 });
+        ch.add({ type: "points", connect: true, x: L.NS, y: d.prob[i], color: pal[i], label: `simulated, ε=${e}`, width: 1.4 });
         ch.add({ x: L.NS, y: d.cheb[i], color: pal[i], dash: [2, 3], width: 1.3 });
         ch.add({ x: L.NS, y: d.normal[i], color: pal[i], dash: [6, 4], width: 1, alpha: 0.7 });
       });
       ch.draw();
     }
     const rows = MODELS.map((model) => [model, ...cfg.NS.map((n) => f(Sim.fracWhere(SAMP[model][n], (s) => Math.abs(s / n - M[model].mu) > 0.05)))]);
-    table("lln-table", ["modello", ...cfg.NS.map((n) => "n = " + n)], rows);
+    table("lln-table", ["model", ...cfg.NS.map((n) => "n = " + n)], rows);
   }
 
   function renderCLT(SAMP, cfg) {
@@ -137,42 +137,42 @@
     }
     for (const n of cfg.NS) {
       const z = Sim.scale(SAMP.Rademacher[n], 1 / Math.sqrt(n)), s = Sim.sorted(z);
-      const ch = chart(el, { title: `QQ-plot, n=${n}`, xlabel: "quantili N(0,1)", xmin: -3, xmax: 3, ymin: -3.2, ymax: 3.2, height: 230, legend: false });
+      const ch = chart(el, { title: `QQ-plot, n=${n}`, xlabel: "N(0,1) quantiles", xmin: -3, xmax: 3, ymin: -3.2, ymax: 3.2, height: 230, legend: false });
       ch.add({ x: [-3, 3], y: [-3, 3], color: "var-fg", dash: [5, 4], width: 1 });
       ch.add({ type: "points", x: zq, y: q.map((p) => Sim.quantile(s, p)), r: 1.8 });
       ch.draw();
       const mo = Sim.moments(z);
       rows.push([n, f(mo.mean), f(mo.var), f(mo.skew), f(mo.exkurt), f(-2 / n), f(Sim.fracWhere(z, (v) => Math.abs(v) > 1.96)), f(Sim.ksNormal(z)), f(Sim.exactKsRademacher(n))]);
     }
-    table("clt-table", ["n", "media", "varianza", "asimmetria", "curtosi ecc.", "esatta −2/n", "P(|Z|>1.96)", "dist. KS (sim.)", "dist. KS (esatta)"], rows);
+    table("clt-table", ["n", "mean", "variance", "skewness", "excess kurtosis", "exact −2/n", "P(|Z|>1.96)", "KS dist. (sim.)", "KS dist. (exact)"], rows);
   }
 
   function renderKS(K, cfg) {
     const el = grid("ks-grid", 1), pal = Plot.palette();
-    const ch = chart(el, { title: "Distanza di Kolmogorov dalla N(0,1)", xlabel: "n", ylabel: "sup |F_n − Φ|", xlog: true, ylog: true, height: 340, legendPos: "right" });
-    ch.add({ type: "points", connect: true, x: K.NS, y: K.rad, color: pal[0], label: "Rademacher S_n/√n — simulazione" });
-    ch.add({ type: "points", connect: true, x: K.NS, y: K.exact, color: "var-fg", label: "Rademacher — distanza esatta", r: 2 });
-    ch.add({ type: "points", connect: true, x: K.NS, y: K.bern, color: pal[1], label: "Bernoulli standardizzato — simulazione" });
+    const ch = chart(el, { title: "Kolmogorov distance from N(0,1)", xlabel: "n", ylabel: "sup |F_n − Φ|", xlog: true, ylog: true, height: 340, legendPos: "right" });
+    ch.add({ type: "points", connect: true, x: K.NS, y: K.rad, color: pal[0], label: "Rademacher S_n/√n — simulated" });
+    ch.add({ type: "points", connect: true, x: K.NS, y: K.exact, color: "var-fg", label: "Rademacher — exact distance", r: 2 });
+    ch.add({ type: "points", connect: true, x: K.NS, y: K.bern, color: pal[1], label: "standardized Bernoulli — simulated" });
     ch.add({ x: K.NS, y: K.NS.map((n) => 0.4748 / Math.sqrt(n)), color: "var-accent", dash: [6, 4], label: "Berry–Esseen 0.4748/√n" });
-    ch.add({ x: K.NS, y: K.NS.map(() => K.mcNoise), color: "var-muted", dash: [2, 3], label: `rumore Monte Carlo 1.36/√m (m=${cfg.mKS})` });
+    ch.add({ x: K.NS, y: K.NS.map(() => K.mcNoise), color: "var-muted", dash: [2, 3], label: `Monte Carlo noise 1.36/√m (m=${cfg.mKS})` });
     ch.draw();
-    $("ks-slope").textContent = `Pendenza log-log della distanza esatta: ${K.slope.toFixed(3)} (teoria −0.5).`;
+    $("ks-slope").textContent = `Log-log slope of the exact distance: ${K.slope.toFixed(3)} (theory −0.5).`;
   }
 
   function renderAttackers(A, G, cfg) {
     const el = grid("att-grid", 2), pal = Plot.palette();
-    const c1 = chart(el, { title: `Precisione Monte Carlo (Rademacher, n=${A.n})`, xlabel: "m = numero di attaccanti", xlog: true, ylog: true, height: 300, legendPos: "right" });
-    c1.add({ type: "points", connect: true, x: A.MS, y: A.errMean, color: pal[0], label: "dev. std. stima di E[S_n/n]" });
-    c1.add({ x: A.MS, y: A.MS.map((m) => 1 / Math.sqrt(m * A.n)), color: pal[0], dash: [5, 4], label: "teoria σ/√(nm)" });
-    c1.add({ type: "points", connect: true, x: A.MS, y: A.ks, color: pal[1], label: "distanza KS media dalla N(0,1)" });
+    const c1 = chart(el, { title: `Monte Carlo precision (Rademacher, n=${A.n})`, xlabel: "m = number of attackers", xlog: true, ylog: true, height: 300, legendPos: "right" });
+    c1.add({ type: "points", connect: true, x: A.MS, y: A.errMean, color: pal[0], label: "std. dev. of estimate of E[S_n/n]" });
+    c1.add({ x: A.MS, y: A.MS.map((m) => 1 / Math.sqrt(m * A.n)), color: pal[0], dash: [5, 4], label: "theory σ/√(nm)" });
+    c1.add({ type: "points", connect: true, x: A.MS, y: A.ks, color: pal[1], label: "mean KS distance from N(0,1)" });
     c1.add({ x: A.MS, y: A.MS.map((m) => 0.87 / Math.sqrt(m)), color: pal[1], dash: [2, 3], label: "≈ 0.87/√m" });
     c1.draw();
-    const c2 = chart(el, { title: `Miglior attaccante: max_j S_n/√n (Rademacher, n=${A.n})`, xlabel: "m = numero di attaccanti", xlog: true, height: 300 });
-    c2.add({ type: "points", connect: true, x: A.MS2, y: A.maxMed, color: pal[0], label: "mediana simulata" });
-    c2.add({ x: A.MS2, y: A.maxTheory, color: "var-fg", dash: [5, 4], label: "mediana del max di m N(0,1)" });
+    const c2 = chart(el, { title: `Best attacker: max_j S_n/√n (Rademacher, n=${A.n})`, xlabel: "m = number of attackers", xlog: true, height: 300 });
+    c2.add({ type: "points", connect: true, x: A.MS2, y: A.maxMed, color: pal[0], label: "simulated median" });
+    c2.add({ x: A.MS2, y: A.maxTheory, color: "var-fg", dash: [5, 4], label: "median of max of m N(0,1)" });
     c2.add({ x: A.MS2, y: A.maxAsym, color: "var-accent", dash: [2, 3], label: "√(2 ln m)" });
     c2.draw();
-    table("agg-table", ["n", "m", "E[T] sim.", "mnp", "dev. std. T sim.", "√(mnp(1−p))", "T/(mn)"],
+    table("agg-table", ["n", "m", "E[T] sim.", "mnp", "std. dev. T sim.", "√(mnp(1−p))", "T/(mn)"],
       G.map((r) => [r.n, r.m, f(r.mean, 1), f(r.meanTh, 1), f(r.sd, 1), f(r.sdTh, 1), f(r.mean / (r.n * r.m))]));
   }
 
@@ -192,23 +192,23 @@
     const status = (i, txt) => { $("status").textContent = txt; $("progress").value = i / steps; };
     const t0 = performance.now();
 
-    status(0, "Simulazione delle traiettorie…"); await tick();
+    status(0, "Simulating trajectories…"); await tick();
     renderTrajectories(Sim.expTrajectories(cfg, rng), cfg);
-    status(1, "Distribuzioni per n = 10 … 10 000…"); await tick();
+    status(1, "Distributions for n = 10 … 10 000…"); await tick();
     const SAMP = Sim.expSamples(cfg, rng);
     renderDistributions(SAMP, cfg); renderTable(SAMP, cfg); renderCLT(SAMP, cfg);
-    status(2, "Studio della varianza…"); await tick();
+    status(2, "Variance study…"); await tick();
     renderVariance(Sim.expVariance(cfg, rng), cfg);
-    status(3, "Legge dei Grandi Numeri…"); await tick();
+    status(3, "Law of Large Numbers…"); await tick();
     renderLLN(Sim.expLLN(cfg, rng), SAMP, cfg);
-    status(4, "Velocità di convergenza nel CLT…"); await tick();
+    status(4, "CLT rate of convergence…"); await tick();
     renderKS(Sim.expKS(cfg, rng), cfg);
-    status(5, "Ruolo del numero di attaccanti…"); await tick();
+    status(5, "Role of the number of attackers…"); await tick();
     const A = Sim.expAttackers(cfg, rng);
-    status(6, "Punteggio aggregato…"); await tick();
+    status(6, "Aggregate score…"); await tick();
     renderAttackers(A, Sim.expAggregate(cfg, rng), cfg);
 
-    status(7, `Completato in ${((performance.now() - t0) / 1000).toFixed(1)} s (seed ${cfg.seed}).`);
+    status(7, `Done in ${((performance.now() - t0) / 1000).toFixed(1)} s (seed ${cfg.seed}).`);
     running = false; $("run").disabled = false;
   }
 
