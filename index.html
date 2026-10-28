@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Penetrazione: LLN e CLT</title>
+  <meta name="description" content="Simulazione di n sistemi e m attaccanti: Legge dei Grandi Numeri, varianza e Teorema Centrale del Limite per i modelli Bernoulli e Rademacher.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="kicker">Homework · Probabilità e simulazione</p>
+    <h1>Processo di penetrazione: LLN, varianza e CLT</h1>
+    <p class="lead">
+      n sistemi, m attaccanti, incrementi i.i.d. X<sub>1</sub>, X<sub>2</sub>, … Studiamo il punteggio totale
+      S<sub>n</sub>, il punteggio medio S<sub>n</sub>/n e il punteggio normalizzato S<sub>n</sub>/√n
+      nei modelli Bernoulli e Rademacher. Tutte le simulazioni girano nel browser.
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===================================================== controls -->
+  <form id="controls" class="panel controls">
+    <label>p (Bernoulli) <input id="p" type="number" min="0.01" max="0.99" step="0.01" value="0.3"></label>
+    <label>m (attaccanti, sez. 2) <input id="m" type="number" min="100" max="20000" step="100" value="5000"></label>
+    <label>seed <input id="seed" type="number" step="1" value="2026"></label>
+    <button id="run" type="submit">Rigenera</button>
+    <div class="status-box">
+      <progress id="progress" max="1" value="0"></progress>
+      <span id="status">In attesa…</span>
+    </div>
+  </form>
+
+  <!-- ===================================================== 0. model -->
+  <section>
+    <h2><span class="num">0</span> Il modello</h2>
+    <p>
+      Ogni attaccante <i>j</i> = 1,…,m attacca in sequenza i sistemi 1,…,n; l'incremento X<sub>i</sub><sup>(j)</sup>
+      è il punteggio ottenuto sul sistema <i>i</i>. La traiettoria di un attaccante è una passeggiata aleatoria
+      S<sub>k</sub><sup>(j)</sup> = X<sub>1</sub><sup>(j)</sup> + … + X<sub>k</sub><sup>(j)</sup>.
+      Gli m attaccanti sono m traiettorie indipendenti: il <b>campione Monte Carlo</b> da cui stimiamo le distribuzioni.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Modello</th><th>Valori</th><th>μ = E[X]</th><th>σ² = Var(X)</th><th>Significato</th></tr></thead>
+        <tbody>
+          <tr><td>Bernoulli(p)</td><td>{0, 1}</td><td>p</td><td>p(1−p)</td><td>1 = sistema violato, 0 = attacco fallito</td></tr>
+          <tr><td>Rademacher</td><td>{−1, +1}</td><td>0</td><td>1</td><td>+1 avanzamento, −1 respinto: caso simmetrico</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Per indipendenza E[S<sub>n</sub>] = nμ e Var(S<sub>n</sub>) = nσ². Da qui le previsioni teoriche:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Quantità</th><th>Media</th><th>Varianza</th><th>Per n → ∞</th></tr></thead>
+        <tbody>
+          <tr><td>S<sub>n</sub></td><td>nμ</td><td>nσ²</td><td>la varianza esplode</td></tr>
+          <tr><td>S<sub>n</sub>/n</td><td>μ</td><td>σ²/n</td><td>→ μ in probabilità (<b>LLN</b>)</td></tr>
+          <tr><td>S<sub>n</sub>/√n</td><td>√n μ</td><td>σ²</td><td>se μ = 0: → N(0, σ²) in distribuzione (<b>CLT</b>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Nel Bernoulli S<sub>n</sub>/√n ha media √n p → ∞: per applicare il CLT va prima centrato,
+      (S<sub>n</sub> − np)/√(np(1−p)). Per questo si introduce il modello Rademacher, a media nulla,
+      in cui S<sub>n</sub>/√n converge direttamente a N(0,1).
+    </p>
+  </section>
+
+  <!-- ===================================================== 1. trajectories -->
+  <section>
+    <h2><span class="num">1</span> Traiettorie campione</h2>
+    <p>30 attaccanti su n = 10 000 sistemi. Asse x logaritmico: k = numero di sistemi già attaccati.
+      Linea tratteggiata = valore atteso, linee puntinate = banda ±2 deviazioni standard.</p>
+    <div id="traj-grid" class="grid"></div>
+    <ul class="obs">
+      <li><b>S<sub>k</sub></b>: nel Bernoulli cresce linearmente (pendenza p); nel Rademacher oscilla intorno a 0.
+        In entrambi i casi il fascio si <i>allarga</i> come √k.</li>
+      <li><b>S<sub>k</sub>/k</b>: le traiettorie si <i>stringono</i> verso μ con ampiezza ∝ 1/√k: la LLN vista traiettoria per traiettoria.</li>
+      <li><b>S<sub>k</sub>/√k</b>: nel Rademacher la banda è <i>stabile</i> (±2); nel Bernoulli la deriva √k p fa divergere le traiettorie.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== 2. distributions -->
+  <section>
+    <h2><span class="num">2</span> Distribuzioni al crescere di n</h2>
+    <p>n ∈ {10, 100, 1 000, 10 000}, m = <span class="m-value">5000</span> attaccanti.
+      L'errore Monte Carlo di una frequenza è al più 0.5/√m, abbastanza piccolo da distinguere gli effetti che ci interessano.
+      Gli istogrammi hanno classi allineate al reticolo dei valori possibili, così non compaiono artefatti di binning.
+      Per S<sub>n</sub> le curve sono normalizzate al proprio picco, per confrontarne posizione e larghezza.</p>
+    <div id="dist-grid" class="grid"></div>
+    <ul class="obs">
+      <li><b>S<sub>n</sub></b> si sposta (media np) e si allarga (σ√n): non ha una distribuzione limite.</li>
+      <li><b>S<sub>n</sub>/n</b> si concentra su μ fino a diventare una "punta": convergenza in probabilità.</li>
+      <li><b>S<sub>n</sub>/√n</b>: nel Rademacher la forma si stabilizza sulla N(0,1) già da n ≈ 100.
+        Nel Bernoulli la larghezza resta costante (σ = √(p(1−p))) ma la distribuzione trasla come √n p.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== 3. variance -->
+  <section>
+    <h2><span class="num">3</span> La varianza sotto le diverse normalizzazioni</h2>
+    <p>Var(S<sub>n</sub>) = nσ², Var(S<sub>n</sub>/n) = σ²/n, Var(S<sub>n</sub>/√n) = σ²:
+      in scala log-log sono rette di pendenza +1, −1 e 0.</p>
+    <div id="varplot-grid" class="grid"></div>
+    <p id="var-slopes" class="result"></p>
+    <div class="table-wrap"><table id="var-table"></table></div>
+    <ul class="obs">
+      <li>Dividere per 1 è <i>troppo poco</i>: la varianza esplode.</li>
+      <li>Dividere per n è <i>troppo</i>: la varianza collassa e resta solo la costante μ (scala della LLN).</li>
+      <li>Dividere per √n è la scala <i>critica</i>: l'unica con varianza finita e non nulla, quindi l'unica con un limite in distribuzione non degenere (scala del CLT).</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== 4. LLN -->
+  <section>
+    <h2><span class="num">4</span> Legge dei Grandi Numeri</h2>
+    <p>
+      Per ogni ε &gt; 0, P(|S<sub>n</sub>/n − μ| &gt; ε) → 0. Dalla disuguaglianza di Chebyshev:
+      P(|S<sub>n</sub>/n − μ| &gt; ε) ≤ σ²/(nε²). Stimiamo la probabilità come frazione di attaccanti (m = 5000)
+      che si discostano più di ε da μ.
+      <span class="legend-inline">● simulazione · ⋯ Chebyshev · ‒ ‒ approssimazione normale 2(1 − Φ(ε√n/σ))</span>
+    </p>
+    <div id="lln-grid" class="grid"></div>
+    <p class="caption">Frazione di attaccanti con |S<sub>n</sub>/n − μ| &gt; 0.05:</p>
+    <div class="table-wrap"><table id="lln-table"></table></div>
+    <ul class="obs">
+      <li>Per ogni ε la probabilità tende a 0. Più piccolo è ε, più sistemi servono: n ≫ σ²/ε².</li>
+      <li>Chebyshev è rispettato ma è pessimista: decresce come 1/n, mentre la probabilità vera decresce <i>esponenzialmente</i> (Hoeffding).</li>
+      <li>Il Rademacher (σ² = 1) converge più lentamente del Bernoulli (σ² = p(1−p)): più rumore significa che servono più sistemi.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== 5. CLT -->
+  <section>
+    <h2><span class="num">5</span> Teorema Centrale del Limite (Rademacher)</h2>
+    <p>
+      Con μ = 0 e σ² = 1: S<sub>n</sub>/√n → N(0,1) in distribuzione. Prima riga: istogramma e densità gaussiana.
+      Seconda riga: QQ-plot contro i quantili della N(0,1).
+    </p>
+    <div id="clt-grid" class="grid"></div>
+    <div class="table-wrap"><table id="clt-table"></table></div>
+    <p>
+      La distanza di Kolmogorov sup<sub>x</sub>|F<sub>n</sub>(x) − Φ(x)| misura la convergenza. Berry–Esseen garantisce che
+      sia ≤ 0.4748·E|X|³/(σ³√n) = 0.4748/√n. La curva <i>esatta</i> si calcola perché (S<sub>n</sub> + n)/2 ~ Bin(n, 1/2).
+    </p>
+    <div id="ks-grid" class="grid"></div>
+    <p id="ks-slope" class="result"></p>
+    <ul class="obs">
+      <li>Media 0 e varianza 1 valgono per ogni n. Ciò che converge è la <i>forma</i>: curtosi in eccesso esattamente −2/n, P(|Z| &gt; 1.96) → 5%.</li>
+      <li>La distanza decresce come 1/√n (pendenza −1/2) e resta sotto Berry–Esseen.
+        Il reticolo di passo 2/√n spiega lo scalino del QQ-plot a n = 10.</li>
+      <li>Per n grande la curva simulata si appiattisce sul rumore Monte Carlo 1.36/√m: con m finito non si possono osservare distanze più piccole.</li>
+      <li>Anche il Bernoulli <i>standardizzato</i> converge alla normale, un po' più lentamente perché asimmetrico.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== 6. attackers -->
+  <section>
+    <h2><span class="num">6</span> Il ruolo del numero di attaccanti m</h2>
+    <p>
+      <b>m come precisione</b>: l'errore delle stime scala come 1/√m. La distanza KS non può scendere sotto la distanza vera
+      (≈ 0.0126 a n = 1000, effetto reticolo): oltre quel punto serve aumentare n, non m.<br>
+      <b>m come minaccia</b>: nel caso a media nulla il <i>miglior</i> attaccante raggiunge circa √(2 ln m)·√n.
+    </p>
+    <div id="att-grid" class="grid"></div>
+    <p class="caption">Punteggio aggregato di tutti gli attaccanti T = Σ<sub>j</sub> S<sub>n</sub><sup>(j)</sup> (Bernoulli, 100 repliche):</p>
+    <div class="table-wrap"><table id="agg-table"></table></div>
+  </section>
+
+  <!-- ===================================================== 7. interpretation -->
+  <section class="panel conclusions">
+    <h2><span class="num">7</span> Interpretazione</h2>
+    <h3>Dimensione del sistema n</h3>
+    <ul>
+      <li><b>S<sub>n</sub> è il danno assoluto.</b> Cresce come nμ, con incertezza σ√n. L'incertezza <i>relativa</i> σ/(μ√n) diminuisce: su parchi grandi l'esito diventa prevedibile.</li>
+      <li><b>S<sub>n</sub>/n è il tasso di compromissione.</b> Si stabilizza sull'efficacia intrinseca μ. Con n ≳ σ²/ε² sistemi la stima ha precisione ε e la fortuna individuale si annulla.</li>
+      <li><b>S<sub>n</sub>/√n è la scala delle fluttuazioni.</b> Nel caso simmetrico è gaussiano: |S<sub>n</sub>| &gt; 1.96√n capita solo nel 5% dei casi in assenza di un vantaggio sistematico. Un valore oltre questa soglia è un indizio di μ &gt; 0, ed è il principio di un test statistico.</li>
+    </ul>
+    <h3>Numero di attaccanti m</h3>
+    <ul>
+      <li>Come <b>replica statistica</b>, m non cambia le leggi limite ma la precisione con cui le osserviamo (∝ 1/√m).</li>
+      <li>Come <b>minaccia</b>, il punteggio aggregato ha media mnμ e fluttuazioni √(mn)σ. Anche con μ = 0, il miglior attaccante arriva a ≈ √(2 ln m)√n: con 3000 attaccanti circa 3.5√n, un valore che un singolo attaccante raggiungerebbe con probabilità ≈ 2·10⁻⁴. La crescita in m è però solo logaritmica, mentre quella in n è √n.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>Relazione completa in <code>README.md</code>. Codice: <code>js/sim.js</code> (simulazione), <code>js/plot.js</code> (grafici su canvas), <code>js/main.js</code> (pagina).</p>
+</footer>
+
+<script src="js/sim.js"></script>
+<script src="js/plot.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

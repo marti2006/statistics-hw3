@@ -1,0 +1,61 @@
+/* Colors (also read by js/plot.js for the charts) */
+:root {
+  --bg: #f7f7f7;
+  --panel: #ffffff;
+  --fg: #222222;
+  --muted: #666666;
+  --grid: #e5e5e5;
+  --accent: #c0392b;
+  --c1: #2f6db5;
+  --c2: #d9822b;
+  --c3: #2e9d6a;
+  --c4: #8e44ad;
+  --c5: #c0392b;
+  --c6: #7f8c8d;
+  --font-ui: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 var(--font-ui);
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+/* Header */
+.hero { background: var(--panel); border-bottom: 1px solid var(--grid); padding: 24px 0; }
+.kicker { color: var(--accent); font-size: 0.8rem; margin: 0; }
+.lead { color: var(--muted); }
+
+/* Sections */
+section { padding: 20px 0; border-bottom: 1px solid var(--grid); }
+.num { color: var(--accent); margin-right: 6px; }
+.panel { background: var(--panel); border: 1px solid var(--grid); padding: 12px 16px; }
+.note { border-left: 3px solid var(--accent); padding-left: 10px; }
+.result { font-weight: bold; color: var(--accent); }
+.caption, .legend-inline { color: var(--muted); font-size: 0.9rem; }
+.legend-inline { display: block; }
+footer { color: var(--muted); font-size: 0.85rem; padding: 20px 16px; }
+
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-top: 16px; }
+.controls label { display: flex; flex-direction: column; font-size: 0.8rem; color: var(--muted); }
+.controls input { width: 7rem; padding: 4px; }
+.controls button { padding: 6px 14px; background: var(--accent); color: #fff; border: 0; cursor: pointer; }
+.controls button:disabled { opacity: 0.5; }
+.status-box { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); }
+
+/* Charts: the number of columns is set from js/main.js via --cols */
+.grid { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.chart { background: var(--panel); border: 1px solid var(--grid); padding: 4px; }
+.chart canvas { display: block; }
+@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; background: var(--panel); font-size: 0.9rem; }
+th, td { padding: 4px 10px; border: 1px solid var(--grid); text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--bg); }
