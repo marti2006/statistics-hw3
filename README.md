@@ -6,7 +6,7 @@ The web application (HTML + CSS + JavaScript, no external libraries) runs every 
 
 ## How to run
 
-Open `index.html` in a browser (double-click it, or use GitHub Pages). The simulations start on page load and take a few seconds; sections fill in as they complete. The bar at the top lets you change $p$, the number of attackers $m$ and the seed; then press **Rigenera** (regenerate).
+**Online:** open the [link](https://marti2006.github.io/statistics-hw3/)
 
 With the default parameters (seed 2026, $p = 0.3$, $m = 5000$) the page produces **exactly** the numbers reported here: the random number generator is deterministic and the experiments always run in the same order.
 
